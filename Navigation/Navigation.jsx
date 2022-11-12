@@ -27,7 +27,6 @@ const Navigation = ({ activeNav, setActiveNav }) => {
   const mouseHoverEvent = mouseOut
     ? -mouseX / navScrollSpeed + navScrollOffset
     : 0;
-
   const handleMouseEnter = () => {
     setMouseOut(true);
   };
@@ -38,44 +37,40 @@ const Navigation = ({ activeNav, setActiveNav }) => {
 
   const handleNavLinks = () => {
     setActiveNav(false);
-    console.log("clicked");
   };
 
-  const handleTouchMove = useCallback((e, offsetX, cursorXPoss) => {
-    if (isPressedDown) return;
-    e.preventDefault();
-    setTouchMoveDistance(offsetX - cursorXPoss);
-  });
+  useEffect(() => {
+    navContainerRef.current.addEventListener("touchstart", handleTouchStart);
+  }, []);
 
-  const handleTouchEnd = useCallback(() => {
-    setIsPressedDown(false);
-    console.log("ended");
-  });
-
-  const handleTouchStart = useCallback((e) => {
+  const handleTouchStart = (e) => {
     setIsPressedDown(true);
     const rect = e.target.getBoundingClientRect();
     const offsetX = e.touches[0].clientX - window.pageXOffset - rect.left;
-    const offsetLeft = navTrackRef.current.scrollLeft;
+    const offsetLeft = navTrackRef.current.offsetLeft;
     const cursorXPoss = offsetX - offsetLeft;
 
     navContainerRef.current.addEventListener(
       "touchmove",
       handleTouchMove(e, offsetX, cursorXPoss)
     );
-
     navContainerRef.current.addEventListener("touchend", handleTouchEnd);
-  });
+  };
 
-  useEffect(() => {
-    navContainerRef.current.addEventListener("touchstart", handleTouchStart);
-  }, [isPressedDown]);
+  const handleTouchEnd = useCallback(() => {
+    setIsPressedDown(false);
+  }, []);
+
+  const handleTouchMove = (e, offsetX, cursorXPoss) => {
+    e.preventDefault();
+    setTouchMoveDistance(offsetX - cursorXPoss);
+  };
 
   useEffect(() => {
     navContainerRef.current.addEventListener("mousemove", onMouseMove);
     return () =>
       navContainerRef.current.removeEventListener("mousemove", onMouseMove);
-  }, [onMouseMove]);
+  }, []);
 
   return (
     <nav className={styles.nav}>
